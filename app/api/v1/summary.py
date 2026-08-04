@@ -1,22 +1,35 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import logging
 import time
 
 from app.models.schemas import SummaryRequest, SummaryResponse
-from app.services.summarizer import generate_summary
+from app.dependencies import get_summary_service
+from app.config.settings import MODEL_NAME
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/v1",
+    tags=["Summary"]
+)
 
 logger = logging.getLogger(__name__)
 
 
-@router.post("/v1/summarize", response_model=SummaryResponse)
-def summarize(request: SummaryRequest):
+@router.post(
+    "/summarize",
+    response_model=SummaryResponse,
+    summary="Generate AI Summary",
+    description="Accepts text and returns an AI-generated summary using Gemini.",
+    response_description="Successfully generated summary."
+)
+def summarize(
+    request: SummaryRequest,
+    summary_service=Depends(get_summary_service)
+):
 
     try:
         start_time = time.perf_counter()
 
-        summary = generate_summary(request.text)
+        summary = summary_service.generate_summary(request.text, request.style)
 
         end_time = time.perf_counter()
 
@@ -27,7 +40,7 @@ def summarize(request: SummaryRequest):
         return SummaryResponse(
             summary=summary,
             word_count=len(summary.split()),
-            model_used="gemini-3.6-flash",
+            model_used=MODEL_NAME,
             processing_time_ms=processing_time_ms
         )
 

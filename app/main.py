@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import logging
 
-from app.routes.summary import router as summary_router
+from app.api.v1.summary import router as summary_router
 
 logging.basicConfig(
     level=logging.INFO,
