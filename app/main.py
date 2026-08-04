@@ -1,6 +1,17 @@
 from fastapi import FastAPI
+import logging
+
+from app.routes.summary import router as summary_router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+)
+
 
 app = FastAPI()
+
+app.include_router(summary_router)
 
 @app.get("/")
 def home():
@@ -19,15 +30,3 @@ def city():
     return {
         "city": "Delhi"
     }
-
-from app.models.request_models import SummaryRequest
-
-from app.services.summarizer import generate_summary
-
-@app.post("/summarize")
-def summarize(request: SummaryRequest):
-    summary = generate_summary(request.text)
-
-    return {
-    "summary": summary
-}
