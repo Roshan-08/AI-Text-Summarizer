@@ -7,6 +7,7 @@ from app.models.schemas import SummaryRequest, SummaryResponse
 from app.dependencies import get_summary_service
 from app.config.settings import MODEL_NAME
 from app.validation.text_validator import validate_text
+from app.models.api_response import APIResponse
 
 router = APIRouter(
     prefix="/v1",
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @router.post(
     "/summarize",
-    response_model=SummaryResponse,
+    response_model=APIResponse,
     summary="Generate AI Summary",
     description="Accepts text and returns an AI-generated summary using Gemini.",
     response_description="Successfully generated summary."
@@ -50,9 +51,15 @@ def summarize(
         2
     )
 
-    return SummaryResponse(
+    summary_response = SummaryResponse(
         summary=summary,
         word_count=len(summary.split()),
         model_used=MODEL_NAME,
         processing_time_ms=processing_time_ms
+    )
+
+    return APIResponse(
+        success=True,
+        message="Summary generated successfully.",
+        data=summary_response
     )
