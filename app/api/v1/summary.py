@@ -22,7 +22,21 @@ logger = logging.getLogger(__name__)
     response_model=APIResponse,
     summary="Generate AI Summary",
     description="Accepts text and returns an AI-generated summary using Gemini.",
-    response_description="Successfully generated summary."
+    response_description="Successfully generated summary.",
+    responses={
+        400: {
+            "description": "Bad Request - Invalid text input."
+        },
+        422: {
+            "description": "Validation Error."
+        },
+        429: {
+            "description": "Too Many Requests - Rate limit exceeded."
+        },
+        500: {
+            "description": "Internal Server Error."
+        }
+    }
 )
 
 @limiter.limit("5/minute")
@@ -30,7 +44,8 @@ def summarize(
     request: Request,
     body: SummaryRequest,
     summary_service=Depends(get_summary_service)
-):
+) -> APIResponse:
+    
     start_time = time.perf_counter()
 
     cleaned_text = validate_text(body.text)
