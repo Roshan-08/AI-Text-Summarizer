@@ -8,6 +8,8 @@ from app.dependencies import get_summary_service
 from app.config.settings import MODEL_NAME
 from app.validation.text_validator import validate_text
 from app.models.api_response import APIResponse
+from app.core.exceptions import InvalidInputException
+from app.utils.text import clean_text
 
 router = APIRouter(
     prefix="/v1",
@@ -48,7 +50,14 @@ def summarize(
     
     start_time = time.perf_counter()
 
+    if not body.text:
+        raise InvalidInputException(
+            "Text cannot be empty"
+        )
+
     cleaned_text = validate_text(body.text)
+
+    cleaned_text = clean_text(cleaned_text)
 
     summary = summary_service.generate_summary(
         cleaned_text,

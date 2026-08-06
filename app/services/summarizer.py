@@ -5,11 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 from app.prompts.summary_prompt import SUMMARY_PROMPT
+from app.core.exceptions import InvalidInputException
 from app.config.settings import (
     GEMINI_API_KEY,
     MODEL_NAME,
     CACHE_TTL,
 )
+
 
 class SummaryService:
 

@@ -12,6 +12,8 @@ import uuid
 from app.api.v1.summary import router as summary_router
 from app.exceptions.handlers import generic_exception_handler
 from app.api.v1.health import router as health_router
+from app.core.exceptions import AppException
+from app.core.exception_handlers import app_exception_handler
 
 
 logging.basicConfig(
@@ -28,6 +30,11 @@ app = FastAPI(
         "name": "Roshan Kumar",
         "url": "https://github.com/Roshan-08",
     },
+)
+
+app.add_exception_handler(
+    AppException,
+    app_exception_handler
 )
 
 app.state.limiter = limiter
