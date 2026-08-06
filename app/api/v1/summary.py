@@ -9,7 +9,7 @@ from app.config.settings import MODEL_NAME
 from app.validation.text_validator import validate_text
 from app.models.api_response import APIResponse
 from app.core.exceptions import InvalidInputException
-from app.utils.text import clean_text
+from app.utils.text import clean_text, remove_html_tags
 
 router = APIRouter(
     prefix="/v1",
@@ -50,14 +50,14 @@ def summarize(
     
     start_time = time.perf_counter()
 
-    if not body.text:
-        raise InvalidInputException(
-            "Text cannot be empty"
-        )
 
     cleaned_text = validate_text(body.text)
 
+    cleaned_text = remove_html_tags(body.text)
+    logger.info(f"After HTML removal: {cleaned_text}")
+
     cleaned_text = clean_text(cleaned_text)
+    logger.info(f"After whitespace cleanup: {cleaned_text}")
 
     summary = summary_service.generate_summary(
         cleaned_text,
