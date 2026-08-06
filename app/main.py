@@ -1,7 +1,13 @@
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
+from app.core.limiter import limiter
 from fastapi import FastAPI
 import logging
 import time
 import uuid
+
 
 from app.api.v1.summary import router as summary_router
 from app.exceptions.handlers import generic_exception_handler
@@ -24,9 +30,20 @@ app = FastAPI(
     },
 )
 
+app.state.limiter = limiter
+
 app.add_exception_handler(
     Exception,
     generic_exception_handler
+)
+
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
+)
+
+app.add_middleware(
+    SlowAPIMiddleware
 )
 
 @app.middleware("http")

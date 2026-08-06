@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from app.core.limiter import limiter
 import logging
 import time
 
@@ -22,17 +23,20 @@ logger = logging.getLogger(__name__)
     description="Accepts text and returns an AI-generated summary using Gemini.",
     response_description="Successfully generated summary."
 )
+
+@limiter.limit("5/minute")
 def summarize(
-    request: SummaryRequest,
+    request: Request,
+    body: SummaryRequest,
     summary_service=Depends(get_summary_service)
 ):
     start_time = time.perf_counter()
 
-    cleaned_text = validate_text(request.text)
+    cleaned_text = validate_text(body.text)
 
     summary = summary_service.generate_summary(
         cleaned_text,
-        request.style
+        body.style
 )
 
     end_time = time.perf_counter()
