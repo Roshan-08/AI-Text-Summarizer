@@ -5,6 +5,8 @@ import uuid
 
 from app.api.v1.summary import router as summary_router
 from app.exceptions.handlers import generic_exception_handler
+from app.api.v1.health import router as health_router
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,7 +14,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(
+    title="AI Text Summarizer API",
+    description="An AI-powered text summarization service built with FastAPI and Google Gemini.",
+    version="1.0.0",
+    contact={
+        "name": "Roshan Kumar",
+        "url": "https://github.com/Roshan-08",
+    },
+)
 
 app.add_exception_handler(
     Exception,
@@ -46,21 +56,16 @@ async def log_requests(request, call_next):
     return response
 
 app.include_router(summary_router)
+app.include_router(health_router)
 
-@app.get("/")
+
+@app.get(
+    "/",
+    tags=["General"],
+    summary="Home Endpoint",
+    description="Returns a welcome message."
+)
 def home():
-    return {"message": "Hello, Roshan! My first FastAPI app is running."}
-
-@app.get("/student")
-def student():
     return {
-        "name": "Roshan",
-        "course": "B.Tech CSE"
-    }
-
-
-@app.get("/city")
-def city():
-    return {
-        "city": "Delhi"
+        "message": "Hello, Roshan! My first FastAPI app is running."
     }
