@@ -14,7 +14,9 @@ def clean_text(text: str) -> str:
 
 def remove_html_tags(text: str) -> str:
     """
-    Remove HTML tags from text.
+    Remove HTML tags from text and normalize whitespace.
     """
 
-    return re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"<[^>]+>", " ", text)
+
+    return re.sub(r"\s+", " ", text).strip()

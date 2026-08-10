@@ -15,6 +15,9 @@ async def generic_exception_handler(
     return JSONResponse(
         status_code=500,
         content={
-            "detail": "Internal Server Error"
+            "success": False,
+            "message": "An internal server error occurred.",
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "data": None
         }
     )
