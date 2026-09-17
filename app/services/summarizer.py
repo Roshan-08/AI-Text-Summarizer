@@ -31,26 +31,53 @@ class SummaryService:
             age = time.time() - cache_item["created_at"]
 
             if age < self.cache_ttl:
-                logger.info(f"Cache HIT: {cache_key}")
+                logger.info(
+                    "Cache HIT | style=%s | text_length=%d",
+                    style,
+                    len(text)
+                )
                 return cache_item["summary"]
 
-            logger.info(f"Cache EXPIRED: {cache_key}")
+            logger.info(
+                "Cache EXPIRED | style=%s | text_length=%d",
+                style,
+                len(text)
+            )
             del self.cache[cache_key]
 
-        logger.info(f"Cache MISS: {cache_key}")
+        logger.info(
+            "Cache MISS | style=%s | text_length=%d",
+            style,
+            len(text)
+        )
 
         prompt = SUMMARY_PROMPT[style].format(text=text)
 
-        response = self.client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt
+        logger.info(
+            "Generating summary | style=%s | model=%s",
+            style,
+            MODEL_NAME
         )
+
+        try:
+            response = self.client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt
+            )
+
+        except Exception:
+            logger.exception(
+                "Gemini request failed | style=%s | text_length=%d",
+                style,
+                len(text)
+            )
+            raise
 
         summary = response.text
 
         self.cache[cache_key] = {
             "summary": summary,
             "created_at": time.time()
-}
+        }
 
         return summary

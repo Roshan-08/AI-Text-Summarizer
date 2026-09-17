@@ -166,6 +166,33 @@ def test_clean_text():
 
     assert result == "Artificial Intelligence is transforming healthcare."
 
+def test_validate_text_success():
+    from app.validation.text_validator import validate_text
+
+    text = (
+        "   Artificial Intelligence is transforming healthcare "
+        "by helping doctors diagnose diseases more accurately.   "
+    )
+
+    result = validate_text(text)
+
+    assert result == (
+        "Artificial Intelligence is transforming healthcare "
+        "by helping doctors diagnose diseases more accurately."
+    )
+def test_summary_request_valid_text():
+    from app.models.schemas import SummaryRequest
+
+    request = SummaryRequest(
+        text=(
+            "Artificial Intelligence is transforming healthcare "
+            "by helping doctors diagnose diseases more accurately."
+        )
+    )
+
+    assert request.text.startswith("Artificial Intelligence")
+    assert request.style == "short"
+
 
 def test_remove_html_tags():
 
@@ -387,3 +414,21 @@ def test_rate_limit_response_structure(client, mock_summary_service):
     assert isinstance(data["detail"], str)
 
     limiter.reset()
+
+def test_summary_request_empty_text():
+    from app.models.schemas import SummaryRequest
+
+    with pytest.raises(ValueError, match="Text cannot be empty."):
+        SummaryRequest(
+            text=" " * 50
+        )
+
+def test_validate_text_too_short():
+    from fastapi import HTTPException
+    from app.validation.text_validator import validate_text
+
+    with pytest.raises(HTTPException) as exc_info:
+        validate_text("Too short")
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Text is too short for summarization."

@@ -16,7 +16,10 @@ from app.core.exceptions import AppException
 from app.core.exception_handlers import app_exception_handler
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+from app.core.logging_config import setup_logging
 
+# configure logging
+setup_logging()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# create FastAPI app
 app = FastAPI(
     title="AI Text Summarizer API",
     description="An AI-powered text summarization service built with FastAPI and Google Gemini.",
