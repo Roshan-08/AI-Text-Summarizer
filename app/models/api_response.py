@@ -1,9 +1,12 @@
-from typing import Any
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
 
-class APIResponse(BaseModel):
+T = TypeVar("T")
+
+
+class APIResponse(BaseModel, Generic[T]):
     success: bool
     message: str
-    data: Any
+    data: T

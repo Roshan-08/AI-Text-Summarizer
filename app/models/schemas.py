@@ -47,3 +47,17 @@ class SummaryResponse(BaseModel):
         ...,
         description="Total time taken to generate the summary in milliseconds."
     )
+
+class HealthResponse(BaseModel):
+    status: str = Field(
+        ...,
+        description="Current health status of the API.",
+        examples=["healthy"]
+    ) 
+
+class HomeResponse(BaseModel):
+    message: str = Field(
+        ...,
+        description="Welcome message returned by the API.",
+        examples=["AI Text Summarizer API is running."]
+    )

@@ -1,36 +1,50 @@
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
-from slowapi import _rate_limit_exceeded_handler
 
-from app.core.limiter import limiter
-from fastapi import FastAPI
 import logging
 import time
 import uuid
 
-
-from app.api.v1.summary import router as summary_router
-from app.exceptions.handlers import generic_exception_handler
 from app.api.v1.health import router as health_router
-from app.core.exceptions import AppException
+from app.api.v1.summary import router as summary_router
 from app.core.exception_handlers import app_exception_handler
-from fastapi.responses import JSONResponse
-from slowapi.errors import RateLimitExceeded
+from app.core.exceptions import AppException
+from app.core.limiter import limiter
 from app.core.logging_config import setup_logging
+from app.exceptions.handlers import generic_exception_handler
+from app.models.schemas import HomeResponse
 
 # configure logging
 setup_logging()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-)
 logger = logging.getLogger(__name__)
 
 # create FastAPI app
 app = FastAPI(
     title="AI Text Summarizer API",
-    description="An AI-powered text summarization service built with FastAPI and Google Gemini.",
+    description="""
+    ## AI Text Summarizer API
+
+    An AI-powered REST API for generating concise summaries from long-form text.
+
+    ### Features
+
+    - Multiple summary styles: short, bullet, and detailed
+    - Google Gemini-powered summarization
+    - Input validation and sanitization
+    - Response caching
+    - Rate limiting
+    - Health monitoring
+    - Structured error handling
+    - Request tracing and processing-time tracking
+
+    ### API Version
+
+    Current API version: **v1**
+    """,
     version="1.0.0",
     contact={
         "name": "Roshan Kumar",
@@ -100,9 +114,15 @@ app.include_router(health_router)
 
 @app.get(
     "/",
+    response_model=HomeResponse,
     tags=["General"],
-    summary="Home Endpoint",
-    description="Returns a welcome message."
+    summary="API Welcome",
+    description="""
+Returns a welcome message confirming that the AI Text Summarizer API is running.
+
+Use this endpoint as a basic connectivity check for the API.
+""",
+    response_description="API welcome message."
 )
 def home():
     return {
