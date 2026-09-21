@@ -130,10 +130,16 @@ def summarize(
     cleaned_text = validate_text(body.text)
 
     cleaned_text = remove_html_tags(cleaned_text)
-    logger.info(f"After HTML removal: {cleaned_text}")
+    logger.info(
+        "HTML removal completed | text_length=%d",
+        len(cleaned_text)
+    )
 
     cleaned_text = clean_text(cleaned_text)
-    logger.info(f"After whitespace cleanup: {cleaned_text}")
+    logger.info(
+        "Whitespace cleanup completed | text_length=%d",
+        len(cleaned_text)
+    )
 
     summary = summary_service.generate_summary(
         cleaned_text,
@@ -163,3 +169,22 @@ def summarize(
         message="Summary generated successfully.",
         data=summary_response
     )
+
+def test_summary_does_not_log_user_text(client, caplog):
+    sensitive_text = (
+        "This is a confidential document that should never appear in application logs."
+    )
+
+    with caplog.at_level("INFO"):
+        response = client.post(
+            "/v1/summarize",
+            json={
+                "text": sensitive_text,
+                "style": "short"
+            }
+        )
+
+    assert response.status_code == 200
+
+    for record in caplog.records:
+        assert sensitive_text not in record.getMessage()

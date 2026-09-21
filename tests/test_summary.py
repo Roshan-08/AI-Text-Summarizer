@@ -130,6 +130,27 @@ def test_summarize_success(client, mock_summary_service):
     assert data["message"] == "Summary generated successfully."
     assert data["data"]["summary"] == "AI is transforming healthcare."
 
+def test_summary_does_not_log_user_text(client, mock_summary_service, caplog):
+
+    sensitive_text = (
+        "This is a confidential document that should never appear in application logs."
+    )
+
+    with caplog.at_level("INFO"):
+
+        response = client.post(
+            "/v1/summarize",
+            json={
+                "text": sensitive_text,
+                "style": "short"
+            }
+        )
+
+    assert response.status_code == 200
+
+    for record in caplog.records:
+        assert sensitive_text not in record.getMessage()
+
 
 @pytest.mark.parametrize(
     "style",
