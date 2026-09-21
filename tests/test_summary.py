@@ -494,3 +494,18 @@ def test_validate_text_too_long():
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Text exceeds the maximum allowed length."
+
+def test_validate_text_accepts_maximum_length():
+    from app.validation.text_validator import validate_text
+    from app.config.settings import settings
+
+    text = ("word " * 10).strip()
+
+    remaining = settings.max_input_length - len(text)
+
+    text += "a" * remaining
+
+    result = validate_text(text)
+
+    assert len(result) == settings.max_input_length
+    assert len(result.split()) >= 10
