@@ -48,3 +48,29 @@ def test_process_time_header_is_numeric(client):
     process_time = response.headers["X-Process-Time"]
 
     assert float(process_time) >= 0
+
+def test_cors_allows_frontend_origin(client):
+
+    response = client.options(
+        "/v1/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
+def test_cors_rejects_unknown_origin(client):
+
+    response = client.options(
+        "/v1/health",
+        headers={
+            "Origin": "http://malicious-site.example",
+            "Access-Control-Request-Method": "GET",
+        }
+    )
+
+    assert "access-control-allow-origin" not in response.headers
