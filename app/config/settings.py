@@ -1,23 +1,20 @@
-import os
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from dotenv import load_dotenv
 
-load_dotenv()
+class Settings(BaseSettings):
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    gemini_api_key: str
+    model_name: str = "gemini-3.6-flash"
+    api_version: str = "v1"
+    cache_ttl: int = Field(default=300, gt=0)
+    max_input_length: int = Field(default=5000, gt=0)
 
-MODEL_NAME = os.getenv(
-    "MODEL_NAME",
-    "gemini-3.6-flash"
-)
-
-CACHE_TTL = int(
-    os.getenv(
-        "CACHE_TTL",
-        300
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False
     )
-)
 
-API_VERSION = "v1"
 
-MAX_INPUT_LENGTH = 5000
+settings = Settings()

@@ -432,3 +432,17 @@ def test_validate_text_too_short():
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Text is too short for summarization."
+
+
+def test_validate_text_too_long():
+    from fastapi import HTTPException
+    from app.validation.text_validator import validate_text
+    from app.config.settings import settings
+
+    text = "a" * (settings.max_input_length + 1)
+
+    with pytest.raises(HTTPException) as exc_info:
+        validate_text(text)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Text exceeds the maximum allowed length."

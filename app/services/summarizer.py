@@ -5,19 +5,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 from app.prompts.summary_prompt import SUMMARY_PROMPT
-from app.config.settings import (
-    GEMINI_API_KEY,
-    MODEL_NAME,
-    CACHE_TTL,
-)
+from app.config.settings import settings
 
 
 class SummaryService:
 
     def __init__(self):
-        self.client = genai.Client(api_key=GEMINI_API_KEY)
+        self.client = genai.Client(api_key=settings.gemini_api_key)
         self.cache = {}
-        self.cache_ttl = CACHE_TTL
+        self.cache_ttl = settings.cache_ttl
 
     def generate_summary(self, text, style):
 
@@ -55,12 +51,12 @@ class SummaryService:
         logger.info(
             "Generating summary | style=%s | model=%s",
             style,
-            MODEL_NAME
+            settings.model_name
         )
 
         try:
             response = self.client.models.generate_content(
-                model=MODEL_NAME,
+                model=settings.model_name,
                 contents=prompt
             )
 

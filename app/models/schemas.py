@@ -5,7 +5,6 @@ class SummaryRequest(BaseModel):
     text: str = Field(
     ...,
     min_length=50,
-    max_length=5000,
     description="Text that will be summarized by the AI model.",
     examples=[
         "Artificial Intelligence is transforming healthcare by helping doctors diagnose diseases more accurately."

@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from app.services.summarizer import SummaryService
-from app.config.settings import MODEL_NAME
+from app.config.settings import settings
 
 def test_generate_summary_cache_miss():
     fake_client = MagicMock()
@@ -31,7 +31,7 @@ def test_generate_summary_cache_miss():
 
     call_args = fake_client.models.generate_content.call_args
 
-    assert call_args.kwargs["model"] == MODEL_NAME
+    assert call_args.kwargs["model"] == settings.model_name
     assert text in call_args.kwargs["contents"]
 
     cache_key = f"{text}:short"
