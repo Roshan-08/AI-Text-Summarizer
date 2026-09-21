@@ -270,6 +270,33 @@ def test_summarize_service_failure(client, failing_summary_service):
     assert data["error_code"] == "INTERNAL_SERVER_ERROR"
     assert data["data"] is None
 
+def test_service_failure_does_not_leak_internal_error(
+    client,
+    failing_summary_service
+):
+
+    sensitive_error = "Gemini API key SECRET-123 failed at C:\\internal\\service.py"
+
+    response = client.post(
+        "/v1/summarize",
+        json={
+            "text": (
+                "Artificial Intelligence is transforming healthcare "
+                "by helping doctors diagnose diseases more accurately."
+            ),
+            "style": "short"
+        }
+    )
+
+    assert response.status_code == 500
+
+    response_text = response.text
+
+    assert "SECRET-123" not in response_text
+    assert "C:\\internal\\service.py" not in response_text
+    assert "Gemini service failed" not in response_text
+    assert "An internal server error occurred." in response_text
+
 def test_invalid_input_exception(client):
     from app.core.exceptions import InvalidInputException
     from app.dependencies import get_summary_service

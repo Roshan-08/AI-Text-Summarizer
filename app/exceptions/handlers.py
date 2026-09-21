@@ -10,7 +10,11 @@ async def generic_exception_handler(
     request: Request,
     exc: Exception
 ):
-    logger.exception(exc)
+    logger.exception(
+        "Unhandled application exception | path=%s | method=%s",
+        request.url.path,
+        request.method
+    )
 
     return JSONResponse(
         status_code=500,
