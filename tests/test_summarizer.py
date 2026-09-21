@@ -34,7 +34,7 @@ def test_generate_summary_cache_miss():
     assert call_args.kwargs["model"] == settings.model_name
     assert text in call_args.kwargs["contents"]
 
-    cache_key = f"{text}:short"
+    cache_key = service._build_cache_key(text, "short")
 
     assert cache_key in service.cache
     assert service.cache[cache_key]["summary"] == result
@@ -55,7 +55,7 @@ def test_generate_summary_cache_hit():
 
     cached_summary = "Cached AI summary."
 
-    cache_key = f"{text}:short"
+    cache_key = service._build_cache_key(text, "short")
 
     service.cache[cache_key] = {
         "summary": cached_summary,
@@ -86,7 +86,7 @@ def test_generate_summary_cache_expired():
         "by helping doctors diagnose diseases more accurately."
     )
 
-    cache_key = f"{text}:short"
+    cache_key = service._build_cache_key(text, "short")
 
     service.cache[cache_key] = {
         "summary": "Old cached summary.",
@@ -121,3 +121,40 @@ def test_generate_summary_gemini_failure():
 
     with pytest.raises(Exception, match="Gemini service failed"):
         service.generate_summary(text, "short")
+
+def test_cache_key_is_sha256_hash():
+
+    service = SummaryService.__new__(SummaryService)
+
+    text = (
+        "Artificial Intelligence is transforming healthcare "
+        "by helping doctors diagnose diseases more accurately."
+    )
+
+    cache_key = service._build_cache_key(text, "short")
+
+    assert len(cache_key) == 64
+    assert cache_key == cache_key.lower()
+
+    assert text not in cache_key
+    assert "short" not in cache_key
+
+
+def test_cache_key_changes_with_text_or_style():
+
+    service = SummaryService.__new__(SummaryService)
+
+    text = (
+        "Artificial Intelligence is transforming healthcare "
+        "by helping doctors diagnose diseases more accurately."
+    )
+
+    same_text_same_style = service._build_cache_key(text, "short")
+    different_style = service._build_cache_key(text, "detailed")
+    different_text = service._build_cache_key(
+        text + " This is additional information.",
+        "short"
+    )
+
+    assert same_text_same_style != different_style
+    assert same_text_same_style != different_text

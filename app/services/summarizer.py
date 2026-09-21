@@ -1,4 +1,5 @@
 import time
+import hashlib
 from google import genai
 import logging
 
@@ -15,9 +16,13 @@ class SummaryService:
         self.cache = {}
         self.cache_ttl = settings.cache_ttl
 
+    def _build_cache_key(self, text, style):
+        cache_input = f"{text}:{style}"
+        return hashlib.sha256(cache_input.encode("utf-8")).hexdigest()
+
     def generate_summary(self, text, style):
 
-        cache_key = f"{text}:{style}"
+        cache_key = self._build_cache_key(text, style)
 
         if cache_key in self.cache:
 
