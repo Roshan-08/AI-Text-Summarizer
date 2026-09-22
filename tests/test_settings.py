@@ -4,7 +4,9 @@ from pydantic import ValidationError
 from app.config.settings import Settings
 
 
-def test_settings_requires_gemini_api_key():
+def test_settings_requires_gemini_api_key(monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
 
