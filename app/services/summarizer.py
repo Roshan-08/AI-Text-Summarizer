@@ -15,6 +15,7 @@ class SummaryService:
         self.client = genai.Client(api_key=settings.gemini_api_key)
         self.cache = {}
         self.cache_ttl = settings.cache_ttl
+        self.cache_max_size = settings.cache_max_size
 
     def _build_cache_key(self, text, style):
         cache_input = f"{text}:{style}"
@@ -74,6 +75,15 @@ class SummaryService:
             raise
 
         summary = response.text
+
+        if len(self.cache) >= self.cache_max_size:
+            oldest_key = next(iter(self.cache))
+            del self.cache[oldest_key]
+
+            logger.info(
+                "Cache EVICT | cache_size=%d",
+                len(self.cache)
+            )
 
         self.cache[cache_key] = {
             "summary": summary,

@@ -17,6 +17,7 @@ def test_generate_summary_cache_miss():
     service.client = fake_client
     service.cache = {}
     service.cache_ttl = 300
+    service.cache_max_size = 100
 
     text = (
         "Artificial Intelligence is transforming healthcare "
@@ -80,6 +81,7 @@ def test_generate_summary_cache_expired():
     service.client = fake_client
     service.cache = {}
     service.cache_ttl = 300
+    service.cache_max_size = 100
 
     text = (
         "Artificial Intelligence is transforming healthcare "
@@ -158,3 +160,31 @@ def test_cache_key_changes_with_text_or_style():
 
     assert same_text_same_style != different_style
     assert same_text_same_style != different_text
+
+
+def test_cache_does_not_exceed_max_size():
+
+    fake_client = MagicMock()
+
+    fake_client.models.generate_content.return_value.text = (
+        "AI summary."
+    )
+
+    service = SummaryService.__new__(SummaryService)
+
+    service.client = fake_client
+    service.cache = {}
+    service.cache_ttl = 300
+    service.cache_max_size = 3
+
+    texts = [
+        "Artificial Intelligence is transforming healthcare by improving diagnosis.",
+        "Machine Learning helps businesses analyze large amounts of useful data.",
+        "Cloud computing provides scalable infrastructure for modern applications.",
+        "Cybersecurity protects systems and data from unauthorized access."
+    ]
+
+    for text in texts:
+        service.generate_summary(text, "short")
+
+    assert len(service.cache) == 3
