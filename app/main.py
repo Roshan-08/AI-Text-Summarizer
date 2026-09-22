@@ -17,6 +17,7 @@ from app.core.limiter import limiter
 from app.core.logging_config import setup_logging
 from app.exceptions.handlers import generic_exception_handler
 from app.models.schemas import HomeResponse
+from app.config.settings import settings
 
 # configure logging
 setup_logging()
@@ -56,7 +57,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
+        settings.frontend_origin,
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST"],
